@@ -24,6 +24,10 @@ Water-Vision-Service/
 ├── yolov8n.pt             # YOLOv8 预训练权重 (首次运行自动下载)
 └── README.md              # 项目说明文档
 
+
+
+
+
 ## 🛠️ 快速启动
 
 ### 1. 克隆项目与创建环境
@@ -34,10 +38,10 @@ git clone [https://github.com/zhouwei20030121-no1/Water-Vision-Service.git](http
 cd Water-Vision-Service
 python -m venv venv
 
-# 激活虚拟环境 (Windows)
+ 激活虚拟环境 (Windows)
 venv\Scripts\activate
 
-# 激活虚拟环境 (macOS/Linux)
+ 激活虚拟环境 (macOS/Linux)
 source venv/bin/activate
 
 ### 2. 安装核心依赖
@@ -51,7 +55,7 @@ Bash
 uvicorn vision_server:app --host 127.0.0.1 --port 8000
 服务启动后，将在终端看到 Uvicorn running on http://127.0.0.1:8000 的成功日志。
 
-###📡 API 接口说明
+##📡 API 接口说明
 微服务启动后，可直接在浏览器访问 http://127.0.0.1:8000/docs 查看交互式 API 文档。
 
 核心端点：视觉画面分析
@@ -72,14 +76,14 @@ JSON
   ],
   "errorMessage": ""
 }
-###🧪 本地算法测试
+##🧪 本地算法测试
 为了方便算法调优与效果展示，本项目附带了本地视频直观测试工具。
 
 运行 python download_videos.py 获取测试视频。
 
 运行 python test_local_video.py，将会弹出图形界面，实时渲染 YOLO 识别框与去雾增强效果。
 
-###🤝 协作指南
+##🤝 协作指南
 本服务目前专为“水域监管 Agent”定制。调用端请配合 AgentVisionConnector (仓颉侧的三方库) 进行集成，以实现最佳的系统健壮性与异常兜底逻辑。
 
 
