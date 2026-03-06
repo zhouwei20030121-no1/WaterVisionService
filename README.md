@@ -16,7 +16,7 @@
 
 ## 📁 核心目录结构
 
-```text
+
 Water-Vision-Service/
 ├── vision_server.py       # FastAPI 微服务主程序
 ├── test_local_video.py    # 本地视频可视化测试脚本
@@ -33,7 +33,7 @@ Water-Vision-Service/
 ### 1. 克隆项目与创建环境
 建议使用 Python 虚拟环境 (Virtualenv) 来隔离项目依赖：
 
-```bash
+
 git clone [https://github.com/zhouwei20030121-no1/Water-Vision-Service.git](https://github.com/zhouwei20030121-no1/Water-Vision-Service.git)
 cd Water-Vision-Service
 python -m venv venv
@@ -46,12 +46,12 @@ source venv/bin/activate
 
 ### 2. 安装核心依赖
 
-```bash
+
 pip install fastapi uvicorn opencv-python ultralytics
 
 
 ###3. 启动服务
-Bash
+
 uvicorn vision_server:app --host 127.0.0.1 --port 8000
 服务启动后，将在终端看到 Uvicorn running on http://127.0.0.1:8000 的成功日志。
 
@@ -76,6 +76,8 @@ JSON
   ],
   "errorMessage": ""
 }
+
+
 ##🧪 本地算法测试
 为了方便算法调优与效果展示，本项目附带了本地视频直观测试工具。
 
