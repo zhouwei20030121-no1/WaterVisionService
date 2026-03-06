@@ -1,10 +1,4 @@
-这次一定给你安排得明明白白！你发来的文本里，很多代码块的“反引号”和标题的“空格”在粘贴时丢失了，导致排版全乱了。
 
-我已经帮你把所有的语法格式全部修复，并且用**代码块**包裹了起来。
-
-你只需要点击下面这个代码框右上角的 **“复制” (Copy)** 按钮，然后直接粘贴替换掉你本地的 `README.md` 内容即可，在 GitHub 上绝对能渲染出最完美的排版：
-
-```markdown
 # 🌊 Water-Vision-Service (水域视觉感知微服务)
 
 ![Python Version](https://img.shields.io/badge/Python-3.8%2B-blue)
@@ -43,6 +37,7 @@ Water-Vision-Service/
 git clone [https://github.com/zhouwei20030121-no1/Water-Vision-Service.git](https://github.com/zhouwei20030121-no1/Water-Vision-Service.git)
 cd Water-Vision-Service
 python -m venv venv
+```
 
 # 激活虚拟环境 (Windows)
 venv\Scripts\activate
@@ -50,7 +45,7 @@ venv\Scripts\activate
 # 激活虚拟环境 (macOS/Linux)
 source venv/bin/activate
 
-```
+
 
 ### 2. 安装核心依赖
 
