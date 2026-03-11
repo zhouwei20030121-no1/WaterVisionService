@@ -4,6 +4,8 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from ultralytics import YOLO
+import time
+from fastapi.responses import PlainTextResponse
 
 # =========================================================================
 # 水域监管智能体 - AI视觉实时流媒体微服务 (业务分流版)
@@ -22,6 +24,14 @@ global_status = {
     "environmentalIssues": [],  # 具体的环境问题列表 (例如: "水面塑料垃圾")
     "errorMessage": ""
 }
+# 全局真实数据统计器
+report_statistics = {
+    "person_count": 0,
+    "boat_count": 0,
+    "bottle_count": 0
+}
+# 防抖记录：防止视频1秒钟30帧导致计数狂飙，设置5秒内同一类目标只算1次
+last_detect_time = {"person": 0, "boat": 0, "bottle": 0}
 
 
 def fast_defog(frame):
@@ -125,6 +135,22 @@ async def video_stream(camera_id: str):
 async def get_status(camera_id: str):
     """📊 数据接口：返回结构化的业务 JSON 数据"""
     return global_status
+
+
+# 🔥 新增接口：提供真实的报告文本，直接返回纯文本 (规避 JSON 解析)
+@app.get("/api/v1/report", response_class=PlainTextResponse)
+async def generate_real_report():
+    p = report_statistics["person_count"]
+    b = report_statistics["boat_count"]
+    t = report_statistics["bottle_count"]
+
+    # Python 端直接拼接好要发给大模型的话术
+    summary = f"【水域监管真实数据总结】\n本监控周期内，AI 视觉引擎共实时拦截并记录：涉水违规 {p} 次，非法船只 {b} 次，水面垃圾 {t} 次。各项异常数据已同步保存。"
+
+    # 拼接前端 UI 拦截画图所需的格式
+    chart_data = f"[CHART_DATA]涉水违规:{p},非法船只:{b},水面垃圾:{t}"
+
+    return f"{summary}\n{chart_data}"
 
 
 if __name__ == "__main__":
