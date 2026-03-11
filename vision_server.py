@@ -153,15 +153,33 @@ async def generate_real_report():
     return f"{summary}\n{chart_data}"
 
 
+import socket
+
+
+def get_host_ip():
+    """自动获取本机的局域网 IP 地址"""
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('8.8.8.8', 80))
+        ip = s.getsockname()[0]
+    finally:
+        s.close()
+    return ip
+
+
 if __name__ == "__main__":
+    local_ip = get_host_ip()
+
     print("\n=================================================")
     print("🚀 视觉微服务已启动！正在监听端口 8000...")
     print("=================================================")
-    print("📺 【实时视频流网址】(直接在浏览器中查看带框画面):")
-    print("   -> http://127.0.0.1:8000/api/v1/stream/test")
-    print("\n📊 【业务数据 JSON 网址】(供仓颉端后台拉取数据):")
-    print("   -> http://127.0.0.1:8000/api/v1/status/test")
-    print("\n📖 【API 交互文档网址】(在线接口测试):")
-    print("   -> http://127.0.0.1:8000/docs")
+    print(f"📡 【本机测试地址】 (仅限本机浏览器访问):")
+    print(f"   -> http://127.0.0.1:8000/docs")
+    print(f"\n🌐 【局域网地址】 (请将此 IP 填入仓颉 tools.cj 中):")
+    print(f"   -> 真实IP地址: {local_ip}")
+    print(f"   -> 视频流网址: http://{local_ip}:8000/api/v1/stream/test")
+    print(f"   -> 数据接口  : http://{local_ip}:8000/api/v1/status/test")
     print("=================================================\n")
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+
+    # 0.0.0.0 保证了本机和局域网手机都能访问
+    uvicorn.run(app, host="0.0.0.0", port=8000)
