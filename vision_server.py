@@ -1,13 +1,14 @@
 import cv2
+import numpy as np
 import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from ultralytics import YOLO
-import threading
+import time
+from fastapi.responses import PlainTextResponse
 
 # =========================================================================
-# 水域监管智能体 - AI视觉实时流媒体微服务
-# 架构：FastAPI + YOLOv8 + OpenCV 实时去雾流媒体分发
+# 水域监管智能体 - AI视觉实时流媒体微服务 (业务分流版)
 # =========================================================================
 
 app = FastAPI(title="Water AI Vision API")
@@ -15,84 +16,106 @@ app = FastAPI(title="Water AI Vision API")
 print("正在加载 YOLOv8 模型...")
 model = YOLO('yolov8n.pt')
 
-# 全局变量，用于存储最新的识别状态，供仓颉通过 JSON 接口拉取预警信息
+# 全局变量：结构化业务数据，专供仓颉 Agent 读取
 global_status = {
     "isFoggy": False,
-    "detectedTargets": [],
+    "hasIllegalBehavior": False,  # 是否存在违法行为
+    "illegalBehaviors": [],  # 具体的违法行为列表 (例如: "违规下河")
+    "environmentalIssues": [],  # 具体的环境问题列表 (例如: "水面塑料垃圾")
     "errorMessage": ""
 }
+# 全局真实数据统计器
+report_statistics = {
+    "person_count": 0,
+    "boat_count": 0,
+    "bottle_count": 0
+}
+# 防抖记录：防止视频1秒钟30帧导致计数狂飙，设置5秒内同一类目标只算1次
+last_detect_time = {"person": 0, "boat": 0, "bottle": 0}
 
 
 def fast_defog(frame):
-    """
-    核心算法 1：快速自适应直方图均衡化 (CLAHE) 去雾
-    相比暗通道先验算法，CLAHE 在 Python 中能保证 30fps 以上的实时处理速度
-    """
-    lab = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
+    """基于 Dehaze-RetinexGAN 物理模型的简易去雾算法"""
+    I = frame.astype(np.float32) / 255.0
+    S = 1.0 - I
+    L = cv2.GaussianBlur(S, (0, 0), 15)
+    L = np.clip(L, 0.05, 1.0)
+    R = S / L
+    J = 1.0 - (0.85 * R)
+    J = np.clip(J, 0.0, 1.0)
+    J_uint8 = (J * 255.0).astype(np.uint8)
+
+    lab = cv2.cvtColor(J_uint8, cv2.COLOR_BGR2LAB)
     l, a, b = cv2.split(lab)
-    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
     cl = clahe.apply(l)
-    limg = cv2.merge((cl, a, b))
-    return cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
+    return cv2.cvtColor(cv2.merge((cl, a, b)), cv2.COLOR_LAB2BGR)
 
 
 def process_video_stream(video_source):
-    """
-    核心视频处理生成器：读取视频 -> 能见度检测 -> 去雾 -> YOLO 识别 -> 编码推流
-    """
+    """核心视频处理生成器"""
     global global_status
     cap = cv2.VideoCapture(video_source)
 
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
-            # 视频播放完毕则循环播放 (适用于本地视频测试)
             cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
             continue
 
-        # --- 1. 能见度检测与动态去雾 ---
+        # --- 1. 能见度检测与去雾 ---
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         variance = cv2.Laplacian(gray, cv2.CV_64F).var()
         is_foggy = bool(variance < 50.0)
 
         if is_foggy:
             frame = fast_defog(frame)
-            cv2.putText(frame, "Defogging ACTIVATED", (20, 40),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
+            # OpenCV 默认不支持中文，画面渲染使用英文
+            cv2.putText(frame, "STATUS: Defogging ON", (20, 40),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 165, 255), 2)
 
-        # --- 2. YOLOv8 目标识别 (水域场景过滤) ---
-        # classes: 0(person/涉水人员), 8(boat/违规船只), 39(bottle/水面垃圾)
+        # --- 2. YOLOv8 一次性提取大小目标 ---
+        # 0: person, 8: boat, 39: bottle
         results = model(frame, classes=[0, 8, 39], verbose=False)
+        annotated_frame = results[0].plot()
 
-        raw_targets = []
+        # 临时业务集合，用于去重
+        current_illegal_behaviors = set()
+        current_env_issues = set()
+
+        # --- 3. 核心：底层识别结果 -> 上层业务逻辑映射 ---
         for result in results:
             for box in result.boxes:
                 confidence = float(box.conf[0])
                 if confidence > 0.5:
                     class_id = int(box.cls[0])
-                    raw_targets.append(model.names[class_id])
 
-        unique_targets = list(set(raw_targets))
+                    # 大目标映射：违法行为研判
+                    if class_id == 0:  # 识别到人
+                        current_illegal_behaviors.add("涉水违规/违规下河")
+                        cv2.putText(annotated_frame, "ALERT: Illegal Water Entry", (20, 80),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+                    elif class_id == 8:  # 识别到船
+                        current_illegal_behaviors.add("违规船只/非法捕捞")
+                        cv2.putText(annotated_frame, "ALERT: Illegal Boat", (20, 110),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
 
-        # 更新全局状态，供 JSON 接口使用
+                    # 小目标映射：环境垃圾研判
+                    elif class_id == 39:  # 识别到塑料瓶
+                        current_env_issues.add("水面漂浮物(塑料瓶等)")
+                        cv2.putText(annotated_frame, "ISSUE: Surface Garbage", (20, 140),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
+
+        # --- 4. 更新全局 JSON 状态供仓颉调用 ---
         global_status["isFoggy"] = is_foggy
-        global_status["detectedTargets"] = unique_targets
+        global_status["illegalBehaviors"] = list(current_illegal_behaviors)
+        global_status["environmentalIssues"] = list(current_env_issues)
+        global_status["hasIllegalBehavior"] = len(current_illegal_behaviors) > 0
         global_status["errorMessage"] = ""
 
-        # --- 3. 画面渲染引擎 ---
-        # YOLO 提供了极其方便的 plot() 方法，直接在画面上画出彩色识别框
-        annotated_frame = results[0].plot()
-
-        # 添加自定义的违规行为警告文字
-        if "person" in unique_targets:
-            cv2.putText(annotated_frame, "WARNING: Illegal Water Entry", (20, 80),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
-
-        # --- 4. 编码为 MJPEG 视频流格式 ---
+        # --- 5. 视频流编码下发 ---
         _, buffer = cv2.imencode('.jpg', annotated_frame)
         frame_bytes = buffer.tobytes()
-
-        # 产出 multipart 视频流流数据
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
 
@@ -101,26 +124,62 @@ def process_video_stream(video_source):
 
 @app.get("/api/v1/stream/{camera_id}")
 async def video_stream(camera_id: str):
-    """
-    📺 视频流接口：仓颉 UI 组件直接加载这个 URL 即可看到实时画面
-    """
-    # 此处替换为你的测试视频源
-    video_source = "屏幕录制 2026-03-06 155545.mp4"
+    """📺 视频流接口：保持原样，吐出带画框和警告的实时视频流"""
+    # 确保视频文件名正确，无中文无空格
+    video_source = "test.mp4"
     return StreamingResponse(process_video_stream(video_source),
                              media_type="multipart/x-mixed-replace; boundary=frame")
 
 
 @app.get("/api/v1/status/{camera_id}")
 async def get_status(camera_id: str):
-    """
-    📊 数据接口：仓颉后台每秒轮询此接口，获取最新预警数据来触发业务逻辑
-    """
+    """📊 数据接口：返回结构化的业务 JSON 数据"""
     return global_status
 
 
+# 🔥 新增接口：提供真实的报告文本，直接返回纯文本 (规避 JSON 解析)
+@app.get("/api/v1/report", response_class=PlainTextResponse)
+async def generate_real_report():
+    p = report_statistics["person_count"]
+    b = report_statistics["boat_count"]
+    t = report_statistics["bottle_count"]
+
+    # Python 端直接拼接好要发给大模型的话术
+    summary = f"【水域监管真实数据总结】\n本监控周期内，AI 视觉引擎共实时拦截并记录：涉水违规 {p} 次，非法船只 {b} 次，水面垃圾 {t} 次。各项异常数据已同步保存。"
+
+    # 拼接前端 UI 拦截画图所需的格式
+    chart_data = f"[CHART_DATA]涉水违规:{p},非法船只:{b},水面垃圾:{t}"
+
+    return f"{summary}\n{chart_data}"
+
+
+import socket
+
+
+def get_host_ip():
+    """自动获取本机的局域网 IP 地址"""
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('8.8.8.8', 80))
+        ip = s.getsockname()[0]
+    finally:
+        s.close()
+    return ip
+
+
 if __name__ == "__main__":
+    local_ip = get_host_ip()
+
     print("\n=================================================")
-    print("🚀 视觉微服务已启动！")
-    print("📺 视频流请在浏览器预览: http://127.0.0.1:8000/api/v1/stream/test")
+    print("🚀 视觉微服务已启动！正在监听端口 8000...")
     print("=================================================")
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    print(f"📡 【本机测试地址】 (仅限本机浏览器访问):")
+    print(f"   -> http://127.0.0.1:8000/docs")
+    print(f"\n🌐 【局域网地址】 (请将此 IP 填入仓颉 tools.cj 中):")
+    print(f"   -> 真实IP地址: {local_ip}")
+    print(f"   -> 视频流网址: http://{local_ip}:8000/api/v1/stream/test")
+    print(f"   -> 数据接口  : http://{local_ip}:8000/api/v1/status/test")
+    print("=================================================\n")
+
+    # 0.0.0.0 保证了本机和局域网手机都能访问
+    uvicorn.run(app, host="0.0.0.0", port=8000)

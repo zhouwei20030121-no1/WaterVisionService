@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c6fbb4ef-ca8c-4c39-b3e6-d1c789cd097e" name="更改" comment="">
+    <list default="true" id="c6fbb4ef-ca8c-4c39-b3e6-d1c789cd097e" name="更改" comment="更新了算法，自己的去雾，加大小目标识别">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/vision_server.py" beforeDir="false" afterPath="$PROJECT_DIR$/vision_server.py" afterDir="false" />
     </list>
@@ -21,6 +21,11 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -56,7 +61,7 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;精进算法&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -165,16 +170,108 @@
       <option name="presentableId" value="Default" />
       <updated>1772782007327</updated>
       <workItem from="1772782008422" duration="7954000" />
-      <workItem from="1772790741092" duration="485000" />
+      <workItem from="1772790741092" duration="1774000" />
+      <workItem from="1773059826715" duration="4479000" />
+      <workItem from="1773211073143" duration="612000" />
+      <workItem from="1773216417801" duration="5394000" />
     </task>
+    <task id="LOCAL-00001" summary="更新可以返回视频">
+      <option name="closed" value="true" />
+      <created>1772791302792</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1772791302792</updated>
+    </task>
+    <task id="LOCAL-00002" summary="更新了算法，自己的去雾，加大小目标识别">
+      <option name="closed" value="true" />
+      <created>1773139280517</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1773139280517</updated>
+    </task>
+    <task id="LOCAL-00003" summary="更新了算法，自己的去雾，加大小目标识别">
+      <option name="closed" value="true" />
+      <created>1773139381041</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1773139381041</updated>
+    </task>
+    <task id="LOCAL-00004" summary="更新了算法，自己的去雾，加大小目标识别">
+      <option name="closed" value="true" />
+      <created>1773139583614</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1773139583614</updated>
+    </task>
+    <task id="LOCAL-00005" summary="更新了算法，自己的去雾，加大小目标识别">
+      <option name="closed" value="true" />
+      <created>1773139654727</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1773139654727</updated>
+    </task>
+    <task id="LOCAL-00006" summary="更新了算法，自己的去雾，加大小目标识别">
+      <option name="closed" value="true" />
+      <created>1773211090570</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1773211090570</updated>
+    </task>
+    <task id="LOCAL-00007" summary="更新了算法，自己的去雾，加大小目标识别">
+      <option name="closed" value="true" />
+      <created>1773211254925</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1773211254925</updated>
+    </task>
+    <task id="LOCAL-00008" summary="更新了算法，自己的去雾，加大小目标识别">
+      <option name="closed" value="true" />
+      <created>1773211572218</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1773211572218</updated>
+    </task>
+    <task id="LOCAL-00009" summary="更新了算法，自己的去雾，加大小目标识别">
+      <option name="closed" value="true" />
+      <created>1773227062798</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1773227062798</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="更新可以返回视频" />
+    <MESSAGE value="更新了算法，自己的去雾，加大小目标识别" />
+    <option name="LAST_COMMIT_MESSAGE" value="更新了算法，自己的去雾，加大小目标识别" />
+  </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/WaterVisionService$download_videos.coverage" NAME="download_videos 覆盖结果" MODIFIED="1772783903086" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/WaterVisionService$test_local_video.coverage" NAME="test_local_video 覆盖结果" MODIFIED="1772790751799" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/WaterVisionService$vision_server.coverage" NAME="vision_server 覆盖结果" MODIFIED="1772790743670" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/WaterVisionService$test_local_video.coverage" NAME="test_local_video 覆盖结果" MODIFIED="1773138306650" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/WaterVisionService$vision_server.coverage" NAME="vision_server 覆盖结果" MODIFIED="1773230766980" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
